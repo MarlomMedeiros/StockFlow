@@ -39,6 +39,21 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Home
                                 </NavLink>
+
+                                <NavLink
+                                    :href="route('categories.index')"
+                                    :active="route().current('categories.index')"
+                                >
+                                    Categorias
+                                </NavLink>
+
+                                <NavLink
+                                    :href="route('users.index')"
+                                    :active="route().current('users.index')"
+                                >
+                                    Usuários
+                                </NavLink>
+
                             </div>
                         </div>
 
