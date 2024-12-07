@@ -1,18 +1,27 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckFirstUser;
+use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+Route::middleware(['auth'])->group(function () {
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 });
+
+Route::middleware(['auth', CheckRole::class.':admin,manager'])->group(function () {
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::resource('users', UserController::class);
+});
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
