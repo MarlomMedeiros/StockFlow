@@ -20,6 +20,12 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
+        $hasAdmin = User::where('role', 'admin')->exists();
+
+        if ($hasAdmin) {
+            return Inertia::render('Auth/Login');
+        }
+
         return Inertia::render('Auth/Register');
     }
 
@@ -28,18 +34,27 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
+        $hasAdmin = User::where('role', 'admin')->exists();
+
+        if ($hasAdmin) {
+            return Inertia::render('Auth/Login');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
+            'phone' => $request->phone,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'admin',
         ]);
 
         event(new Registered($user));
