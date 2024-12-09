@@ -41,10 +41,25 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
 
                                 <NavLink
+                                    :href="route('products.index')"
+                                    :active="route().current('products.index')"
+                                >
+                                    Produtos
+                                </NavLink>
+
+                                <NavLink :href="route('suppliers.index')" :active="route().current('suppliers.index')">
+                                    Fornecedores
+                                </NavLink>
+
+                                <NavLink
                                     :href="route('categories.index')"
                                     :active="route().current('categories.index')"
                                 >
                                     Categorias
+                                </NavLink>
+
+                                <NavLink :href="route('stocks.index')" :active="route().current('stocks.index')">
+                                    Estoque
                                 </NavLink>
 
                                 <NavLink

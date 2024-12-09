@@ -23,7 +23,7 @@ class CategoryController extends Controller
 
         Category::query()->create($request->only('name'));
 
-        return redirect()->back()->with('success', 'Category created successfully!');
+        return redirect()->route('categories.index')->with('success', 'Category created successfully!');
     }
 
     public function update(Request $request, Category $category): RedirectResponse
@@ -32,12 +32,12 @@ class CategoryController extends Controller
 
         $category->update($request->only('name'));
 
-        return redirect()->back()->with('success', 'Category updated successfully!');
+        return redirect()->route('categories.index')->with('success', 'Category updated successfully!');
     }
 
     public function destroy(Category $category): RedirectResponse
     {
         $category->delete();
-        return redirect()->back()->with('success', 'Category deleted successfully!');
+        return redirect()->route('categories.index')->with('success', 'Category deleted successfully!');
     }
 }

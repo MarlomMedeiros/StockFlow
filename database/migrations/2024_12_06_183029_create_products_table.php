@@ -21,7 +21,6 @@ return new class extends Migration
             $table->decimal('cost_price', 10, 2);
             $table->decimal('sale_price', 10, 2);
             $table->integer('minimum_stock')->default(0);
-            $table->integer('stock_quantity')->default(0);
             $table->date('expiration_date')->nullable();
             $table->timestamps();
         });

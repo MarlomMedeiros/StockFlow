@@ -3,7 +3,10 @@
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckFirstUser;
 use App\Http\Middleware\CheckRole;
@@ -15,11 +18,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', CheckRole::class.':admin,manager'])->group(function () {
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-
+    Route::resource('categories', CategoryController::class);
     Route::resource('users', UserController::class);
+    Route::resource('products', ProductController::class);
+    Route::resource('suppliers', SupplierController::class);
+    Route::resource('stocks', StockMovementController::class);
 });
 
 

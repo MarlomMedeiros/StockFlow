@@ -17,7 +17,6 @@ class Product extends Model
         'cost_price',
         'sale_price',
         'minimum_stock',
-        'stock_quantity',
         'expiration_date',
     ];
 
