@@ -17,20 +17,23 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::all();
-        return Inertia::render('Users/Index', ['users' => $users]);
+        $users = User::paginate(10);
+
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorize('create', User::class);
+        $this->authorize('createUser', [User::class, $request->all()]);
 
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,manager,common_user',
+            'role' => 'required|in:admin,manager,common_user|not_in: ' . auth()->user()->role,
         ]);
 
         User::create([
@@ -47,7 +50,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $this->authorize('update', $user);
+        $this->authorize('create', [User::class, $request->all()]);
 
         $request->validate([
             'name' => 'required|string|max:255',

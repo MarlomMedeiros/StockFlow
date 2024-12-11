@@ -22,7 +22,7 @@
                             required
                         >
                             <option value="" disabled>Selecione um Produto</option>
-                            <option v-for="product in products" :key="product.id" :value="product.id">
+                            <option v-for="product in products" :key="product.id" :value="product.id" id="selectProduct">
                                 {{ product.name }}
                             </option>
                         </select>
@@ -49,7 +49,7 @@
                             placeholder="Motivo (opcional)"
                             class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-blue-600"
                         />
-                        <div class="flex justify-between">
+                        <div class="flex justify-between" v-if="$page.props.auth.user.role !== 'common_user'">
                             <button
                                 type="submit"
                                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition dark:bg-blue-600 dark:hover:bg-blue-700"
@@ -82,7 +82,7 @@
                                     class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition dark:bg-gray-600 dark:hover:bg-gray-700">
                                 Filtrar
                             </button>
-                            <button
+                            <button v-if="$page.props.auth.user.role !== 'common_user'"
                                 @click="showForm"
                                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition dark:bg-blue-600 dark:hover:bg-blue-700"
                             >
@@ -120,9 +120,10 @@
                         </tr>
                         </tbody>
                     </table>
-                    <div class="p-4">
-
-                    </div>
+                    <Pagination
+                        :pagination="movements"
+                        base-url="/stocks"
+                    />
                 </div>
             </div>
         </div>
@@ -135,11 +136,14 @@ import {useForm, router} from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import moment from 'moment';
 import 'moment/locale/pt-br';
+import Pagination from "@/Components/Pagination.vue";
 
 export default {
+    components: {Pagination},
     props: {
         movements: Object,
         products: Array,
+        selectedProduct: String,
     },
     methods: {
         formatDate(date) {
@@ -186,8 +190,10 @@ export default {
         };
 
         const filterByProduct = () => {
-            router.get('/stocks', {product_id: selectedProduct.value}, {preserveState: true});
+            router.get('/stocks', { product_id: selectedProduct.value });
         };
+
+
 
         return {
             form,

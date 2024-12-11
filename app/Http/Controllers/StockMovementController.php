@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\StockMovement;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,10 +12,16 @@ use Inertia\Response;
 
 class StockMovementController extends Controller
 {
-
+    use AuthorizesRequests;
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', StockMovement::class);
+
         $query = StockMovement::with('product');
+
+        if (auth()->user()->role === 'common_user') {
+            $query->whereNotIn('type', ['adjustment']);
+        }
 
         if ($request->has('product_id') && $request->query('product_id')) {
             $query->where('product_id', $request->query('product_id'));
@@ -34,11 +41,14 @@ class StockMovementController extends Controller
         return Inertia::render('Stocks/Index', [
             'movements' => $movements,
             'products' => Product::query()->select('id', 'name')->get(),
+            'selectedProduct' => $request->query('product_id')
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', StockMovement::class);
+
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'type' => 'required|in:entry,exit,adjustment',
@@ -48,7 +58,7 @@ class StockMovementController extends Controller
 
         $quantity = $request->type === 'exit' ? -$request->quantity : $request->quantity;
 
-        $movement = StockMovement::query()->create([
+        StockMovement::query()->create([
             'product_id' => $request->product_id,
             'type' => $request->type,
             'quantity' => $quantity,

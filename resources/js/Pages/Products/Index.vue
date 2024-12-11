@@ -155,7 +155,8 @@
                 </div>
 
                 <div v-else class="overflow-x-auto">
-                    <div class="flex justify-between items-center p-4">
+                    <Search :filters="filters" :base-url="route('products.index')"/>
+                    <div class="flex  justify-between items-center p-4" v-if="$page.props.auth.user.role !== 'common_user'">
                         <h2 class="text-xl font-bold dark:text-gray-200">Lista de Produtos</h2>
                         <button
                             @click="showForm"
@@ -174,12 +175,12 @@
                             <th class="border px-4 py-2 dark:border-gray-600">Categoria</th>
                             <th class="border px-4 py-2 dark:border-gray-600">Fornecedor</th>
                             <th class="border px-4 py-2 dark:border-gray-600">Preço Venda</th>
-                            <th class="border px-4 py-2 text-center dark:border-gray-600">Ações</th>
+                            <th v-if="$page.props.auth.user.role !== 'common_user'" class="border px-4 py-2 text-center dark:border-gray-600">Ações</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr
-                            v-for="product in products"
+                            v-for="product in products.data"
                             :key="product.id"
                             class="hover:bg-gray-50 transition dark:hover:bg-gray-600"
                         >
@@ -188,7 +189,7 @@
                             <td class="border px-4 py-2 dark:border-gray-600">{{ product.category?.name }}</td>
                             <td class="border px-4 py-2 dark:border-gray-600">{{ product.supplier?.name || 'N/A' }}</td>
                             <td class="border px-4 py-2 dark:border-gray-600">R$ {{ parseFloat(product.sale_price).toFixed(2) }}</td>
-                            <td class="border px-4 py-2 text-center dark:border-gray-600">
+                            <td v-if="$page.props.auth.user.role !== 'common_user'" class="border px-4 py-2 text-center dark:border-gray-600">
                                 <div class="flex justify-center space-x-2">
                                     <button
                                         @click="editProduct(product)"
@@ -211,7 +212,13 @@
                             </td>
                         </tr>
                         </tbody>
+
                     </table>
+                    <Pagination
+                        :pagination="products"
+                        base-url="/products"
+                        :filters="filters"
+                    />
                 </div>
             </div>
         </div>
@@ -222,12 +229,17 @@
 import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Pagination from "@/Components/Pagination.vue";
+import Search from '@/Components/Search.vue';
+
 
 export default {
+    components: {Pagination, Search},
     props: {
-        products: Array,
+        products: Object,
         categories: Array,
         suppliers: Array,
+        filters: Object,
     },
     layout: AuthenticatedLayout,
     setup(props) {
@@ -244,6 +256,7 @@ export default {
             minimum_stock: 1,
             expiration_date: null,
         });
+
 
         const showForm = () => {
             form.reset();

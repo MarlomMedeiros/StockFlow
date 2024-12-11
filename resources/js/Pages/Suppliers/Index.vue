@@ -27,6 +27,7 @@
                             v-model="form.cnpj"
                             type="text"
                             placeholder="CNPJ do Fornecedor"
+                            id="cnpj"
                             class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-blue-600"
                             required
                         />
@@ -34,6 +35,7 @@
                             v-model="form.contact"
                             type="text"
                             placeholder="Contato do Fornecedor"
+                            id="contact"
                             class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-blue-600"
                             required
                         />
@@ -56,7 +58,7 @@
                 </div>
 
                 <div v-else class="overflow-x-auto">
-                    <div class="flex justify-between items-center p-4">
+                    <div v-if="$page.props.auth.user.role !== 'common_user'" class="flex justify-between items-center p-4">
                         <h2 class="text-xl font-bold dark:text-gray-200">Lista de Fornecedores</h2>
                         <button
                             @click="showForm"
@@ -73,19 +75,19 @@
                             <th class="border px-4 py-2 dark:border-gray-600">Nome</th>
                             <th class="border px-4 py-2 dark:border-gray-600">CNPJ</th>
                             <th class="border px-4 py-2 dark:border-gray-600">Contato</th>
-                            <th class="border px-4 py-2 text-center dark:border-gray-600">Ações</th>
+                            <th v-if="$page.props.auth.user.role !== 'common_user'" class="border px-4 py-2 text-center dark:border-gray-600">Ações</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr
-                            v-for="supplier in suppliers"
+                            v-for="supplier in suppliers.data"
                             :key="supplier.id"
                             class="hover:bg-gray-50 transition dark:hover:bg-gray-600"
                         >
                             <td class="border px-4 py-2 dark:border-gray-600">{{ supplier.name }}</td>
                             <td class="border px-4 py-2 dark:border-gray-600">{{ supplier.cnpj }}</td>
                             <td class="border px-4 py-2 dark:border-gray-600">{{ supplier.contact }}</td>
-                            <td class="border px-4 py-2 text-center dark:border-gray-600">
+                            <td v-if="$page.props.auth.user.role !== 'common_user'" class="border px-4 py-2 text-center dark:border-gray-600">
                                 <div class="flex justify-center space-x-2">
                                     <button
                                         @click="editSupplier(supplier)"
@@ -109,6 +111,10 @@
                         </tr>
                         </tbody>
                     </table>
+                    <Pagination
+                        :pagination="$page.props.suppliers"
+                        base-url="/suppliers"
+                    />
                 </div>
             </div>
         </div>
@@ -119,10 +125,12 @@
 import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Pagination from "@/Components/Pagination.vue";
 
 export default {
+    components: {Pagination},
     props: {
-        suppliers: Array,
+        suppliers: Object,
     },
     layout: AuthenticatedLayout,
     setup() {
@@ -160,21 +168,18 @@ export default {
         const submit = () => {
             if (form.id) {
                 form.put(`/suppliers/${form.id}`, {
-                    onSuccess: () => {
-                        hideForm();
-                    },
+                    onSuccess: cancelForm,
                 });
             } else {
                 form.post("/suppliers", {
-                    onSuccess: () => {
-                        hideForm();
-                    },
+                    onSuccess: cancelForm,
                 });
             }
         };
 
         const cancelForm = () => {
             hideForm();
+            form.reset();
         };
 
         return { form, isFormVisible, showForm, hideForm, editSupplier, deleteSupplier, submit, cancelForm };

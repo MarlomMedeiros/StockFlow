@@ -42,7 +42,7 @@
                             class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-blue-600"
                         >
                             <option value="" disabled>Selecione o cargo</option>
-                            <option value="admin">Administrador</option>
+                            <option v-if="$page.props.auth.user.role === 'admin'" value="admin">Administrador</option>
                             <option value="manager">Gerente</option>
                             <option value="common_user">Usuário comum</option>
                         </select>
@@ -65,7 +65,7 @@
                 </div>
 
                 <div v-else class="overflow-x-auto">
-                    <div class="flex justify-between items-center p-4">
+                    <div class="flex justify-between items-center p-4" v-if="$page.props.auth.user.role !== 'common_user'">
                         <h2 class="text-xl font-bold dark:text-gray-200">Lista de Usuários</h2>
                         <button
                             @click="showForm"
@@ -86,7 +86,7 @@
                         </thead>
                         <tbody>
                         <tr
-                            v-for="user in users"
+                            v-for="user in users.data"
                             :key="user.id"
                             class="hover:bg-gray-50 transition dark:hover:bg-gray-600"
                         >
@@ -95,7 +95,7 @@
                             <td class="border px-4 py-2 dark:border-gray-600">{{ user.email }}</td>
                             <td class="border px-4 py-2 capitalize dark:border-gray-600">{{ user.role }}</td>
                             <td class="border px-4 py-2 text-center dark:border-gray-600">
-                                <div class="flex justify-center space-x-2">
+                                <div class="flex justify-center space-x-2" v-if="user.role !== 'admin' || user.id === $page.props.auth.user.id">
                                     <button
                                         @click="editUser(user)"
                                         class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition dark:bg-yellow-600 dark:hover:bg-yellow-700"
@@ -116,6 +116,10 @@
                         </tr>
                         </tbody>
                     </table>
+                    <Pagination
+                        :pagination="$page.props.users"
+                        base-url="/users"
+                    />
                 </div>
             </div>
         </div>
@@ -126,10 +130,12 @@
 import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Pagination from "@/Components/Pagination.vue";
 
 export default {
+    components: {Pagination},
     props: {
-        users: Array,
+        users: Object,
     },
     layout: AuthenticatedLayout,
     setup(props) {

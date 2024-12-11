@@ -14,10 +14,14 @@ class UserPolicy
         return in_array($user->role, ['admin', 'manager']);
     }
 
-    public function create(User $user): bool
+    public function create(User $user, $newUserData): bool
     {
+        if ($user->role === 'manager' && $newUserData['role'] === 'admin') {
+            return false;
+        }
         return in_array($user->role, ['admin', 'manager']);
     }
+
 
     public function update(User $user, User $targetUser): bool
     {
